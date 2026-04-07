@@ -79,9 +79,9 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GOOGLE_AI_API_KEY = Deno.env.get("GOOGLE_AI_API_KEY");
+    if (!GOOGLE_AI_API_KEY) {
+      throw new Error("GOOGLE_AI_API_KEY is not configured");
     }
 
     const userPrompt = `Analyze this resume against the job description.
@@ -94,18 +94,26 @@ ${jobDescription}
 
 Return ONLY valid JSON matching the schema. No markdown, no code blocks, just raw JSON.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_AI_API_KEY}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
+        contents: [
+          {
+            parts: [
+              { text: SYSTEM_PROMPT },
+              { text: userPrompt }
+            ]
+          }
         ],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 4000,
+          candidateCount: 1,
+          stopSequences: ["```"]
+        }
       }),
     });
 
@@ -116,32 +124,35 @@ Return ONLY valid JSON matching the schema. No markdown, no code blocks, just ra
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (response.status === 403) {
         return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add funds." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "API key invalid or quota exceeded. Check your Google AI API key." }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      console.error("Google AI error:", response.status, t);
       throw new Error("AI analysis failed");
     }
 
     const aiResponse = await response.json();
-    const content = aiResponse.choices?.[0]?.message?.content;
+    const content = aiResponse.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!content) {
+      console.error("Invalid Google AI response:", aiResponse);
       throw new Error("No content in AI response");
     }
 
     // Parse JSON from response, handling potential markdown wrapping
     let parsed;
     try {
+      // Google AI might return JSON directly or wrapped in markdown
       const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       parsed = JSON.parse(cleaned);
-    } catch {
+    } catch (error) {
       console.error("Failed to parse AI response:", content);
-      throw new Error("Failed to parse analysis results");
+      console.error("Parse error:", error);
+      throw new Error("Failed to parse analysis results: " + error.message);
     }
 
     return new Response(JSON.stringify(parsed), {

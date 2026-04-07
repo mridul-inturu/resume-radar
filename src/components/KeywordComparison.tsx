@@ -10,7 +10,7 @@ function KeywordList({ label, keywords, matchSet }: { label: string; keywords: s
   if (!keywords.length) return null;
   return (
     <div>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{label}</p>
+      <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">{label}</p>
       <div className="flex flex-wrap gap-1.5">
         {keywords.map((kw) => (
           <Badge
@@ -34,11 +34,11 @@ export function KeywordComparison({ resumeKeywords, jdKeywords }: KeywordCompari
 
   return (
     <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">JD Keywords vs Your Resume</h3>
-      <p className="text-xs text-muted-foreground mb-4">
-        <Badge variant="default" className="text-xs mr-1">Matched</Badge> = found in your resume
-        <Badge variant="secondary" className="text-xs ml-2 mr-1">Missing</Badge> = not found
-      </p>
+      <h3 className="text-lg font-semibold text-white mb-1">JD Keywords vs Your Resume</h3>
+      <div className="text-xs text-zinc-500 mb-4 flex items-center gap-2 flex-wrap">
+        <Badge variant="default" className="text-xs">Matched</Badge> = found in your resume
+        <Badge variant="secondary" className="text-xs">Missing</Badge> = not found
+      </div>
       <div className="space-y-4">
         <KeywordList label="Technical Skills" keywords={jdKeywords.technicalSkills} matchSet={resumeAll} />
         <KeywordList label="Tools & Technologies" keywords={jdKeywords.tools} matchSet={resumeAll} />

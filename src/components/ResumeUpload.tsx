@@ -29,15 +29,15 @@ export function ResumeUpload({ onFileSelect, selectedFile, onClear }: ResumeUplo
 
   if (selectedFile) {
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
-        <FileText className="h-5 w-5 text-primary shrink-0" />
+      <div className="flex items-center gap-3 rounded-lg border border-indigo-500/30 bg-indigo-500/5 p-4">
+        <FileText className="h-5 w-5 text-indigo-400 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{selectedFile.name}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm font-medium text-white truncate">{selectedFile.name}</p>
+          <p className="text-xs text-zinc-500">
             {(selectedFile.size / 1024).toFixed(1)} KB
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClear} className="shrink-0 h-8 w-8">
+        <Button variant="ghost" size="icon" onClick={onClear} className="shrink-0 h-8 w-8 text-zinc-400 hover:text-white">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -51,7 +51,9 @@ export function ResumeUpload({ onFileSelect, selectedFile, onClear }: ResumeUplo
       onDrop={handleDrop}
       className={cn(
         'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer',
-        isDragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/50'
+        isDragOver
+          ? 'border-indigo-500 bg-indigo-500/10'
+          : 'border-white/10 hover:border-indigo-500/50 hover:bg-white/3'
       )}
     >
       <input
@@ -60,9 +62,9 @@ export function ResumeUpload({ onFileSelect, selectedFile, onClear }: ResumeUplo
         onChange={handleFileInput}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
-      <Upload className="h-8 w-8 text-muted-foreground mb-3" />
-      <p className="text-sm font-medium">Drop your resume PDF here</p>
-      <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+      <Upload className="h-8 w-8 text-zinc-500 mb-3" />
+      <p className="text-sm font-medium text-zinc-300">Drop your resume PDF here</p>
+      <p className="text-xs text-zinc-600 mt-1">or click to browse</p>
     </div>
   );
 }
